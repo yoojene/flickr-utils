@@ -5,12 +5,15 @@ var Flickr = require("flickrapi"),
     };
 var json2csv = require('json2csv');
 var fs = require('fs');
+var prompt = require('prompt');
 
+prompt.start();
 
-var fields = ['id', 'title', 'url_m', 'url_o'];
-
+var fields = ["id", "title", "url_m", "url_o"];
 
 Flickr.authenticate(flickrOptions, function(error, flickr) {
+
+
   // we can now use "flickr" as our API object
 
 	 getPhotoList();
@@ -34,27 +37,44 @@ Flickr.authenticate(flickrOptions, function(error, flickr) {
 
 			console.log(photoArr);
 
-			var photoSetID;
-			for (var y = 0; y < photoArr.length; y++){
+			prompt.get(['album', 'csvFile'], function (err, result) {
 
-				if (photoArr[y].title.indexOf('Tea Ceremony') != -1){ // Just use Noci album for testing
-					console.log('here');
-
-					photoSetID = photoArr[y].photoset_id;
-					break;
-
-				}
+				if(error){
+					throw new Error(error);
 			}
 
-			console.log('photoSetID - ' + photoSetID);
+				console.log('Command-line input received:');
+				console.log('  album: ' + result.album);
+				console.log('  csvFile: ' + result.csvFile);
 
-			getPhotos(photoSetID);
+				var photoSetID;
+				for (var y = 0; y < photoArr.length; y++){
+
+					if (photoArr[y].title.indexOf(result.album) != -1){ // Just use Noci album for testing
+						console.log('here');
+
+						photoSetID = photoArr[y].photoset_id;
+						break;
+
+					}
+				}
+
+				console.log('photoSetID - ' + photoSetID);
+
+
+				getPhotos(photoSetID, result.csvFile);
+
+
+			});
+
 
 		});
 
 	}
 
-	function getPhotos(setID) {
+	function getPhotos(setID, csv) {
+
+
 
 		flickr.photosets.getPhotos({
 
@@ -72,10 +92,10 @@ Flickr.authenticate(flickrOptions, function(error, flickr) {
 		console.log(result.photoset.photo);
 
 			try {
-				  var csvRes = json2csv({data: result.photoset.photo, field: fields});
+				  var csvRes = json2csv({data: result.photoset.photo, fields: fields});
 				  console.log(csvRes);
 
-					fs.writeFile('Tea.csv', csvRes, function(err) {
+					fs.writeFile(csv+'.csv', csvRes, function(err) {
 					  if (err) throw err;
 					  console.log('file saved');
 					});
