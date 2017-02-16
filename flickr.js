@@ -1,7 +1,7 @@
 var Flickr = require("flickrapi"),
     flickrOptions = {
-      api_key: "ca9278ba6ae27642d17d744ba6df0e99",
-      secret: "9b82a86a0cbf68c4"
+      api_key: "",
+      secret: ""
     };
 var json2csv = require('json2csv');
 var fs = require('fs');
